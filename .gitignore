@@ -1,0 +1,12 @@
+# Added for Rust: ignore all build artifacts and downloaded dependencies
+/target
+
+# Added for IDEs: ignore personal VS Code settings
+.vscode/
+
+# Added for Security: ignore files containing secrets or API keys
+.env
+
+# Added for OS: ignore system-specific junk files
+.DS_Store
+Thumbs.db
