@@ -1,36 +1,65 @@
-// Required for the compiler to format the custom struct for printing
+use rand::{thread_rng, seq::SliceRandom};
+
+/// A collection of playing cards stored as a growable array of Strings in the Heap.
 #[derive(Debug)]
 struct Deck {
-    // A vector (growable list) of strings representing playing cards
     cards: Vec<String>,
 }
 
-fn main() {
+impl Deck {
+    /// Associated function to generate a standard 24-card deck.
+    /// Allocates a new block of memory on the Heap for the cards vector.
+    fn new() -> Self {
+        let suits = ["Hearts", "Spades", "Diamonds", "Clubs"];
+        let values = ["Ace", "Two", "Three", "Four", "Five", "Six"];
 
-    // List of suits
-    let suits = ["Hearts", "Spades", "Diamonds", "Clubs"];
-    
-    // List of values
-    let values = ["Ace", "Two", "Three", "Four", "Five", "Six"];
+        let mut cards = vec![];
 
-    // Needs to be 'mut' (mutable) to allow adding cards later in the loop
-    let mut cards = vec![];
-
-    // Double nested for loop to iterate through every combination
-    for suit in suits {
-        for value in values {
-            // The format! macro automatically builds the string
-            let card = format!("{} of {}", value, suit);
-            
-            // Add the new card to the vector
-            cards.push(card);
+        for suit in suits {
+            for value in values {
+                // format! allocates a new String on the Heap for every card.
+                let card = format!("{} of {}", value, suit);
+                cards.push(card);
+            }
         }
+
+        // Returns ownership of the Heap-allocated Deck back to the caller.
+        Deck { cards }
     }
 
-    // Create a new instance of Deck and pass in the populated vector
-    // (Shortcut: Just write `Deck { cards };` here)
-    let deck = Deck { cards: cards }; 
+    /// Shuffles the cards in-place.
+    /// Uses a mutable borrow (&mut) to rearrange memory without new allocations.
+    /// High-performance: No data is copied, just the internal pointers are swapped.
+    fn shuffle(&mut self) {
+        let mut rng = thread_rng();
+        self.cards.shuffle(&mut rng);
+    }
+
+    /// Deals cards by splitting the RAM block at a specific index.
+    /// Moves ownership of the 'tail' portion of the vector to a new variable.
+    /// The original 'cards' vector is shrinked in-place. 
+    fn deal(&mut self, num_cards: usize) -> Vec<String> {
+        // split_off is a zero-copy move of the elements' pointers.
+        // WARNING: Panic-prone if num_cards > cards.len()!
+        self.cards.split_off(self.cards.len() - num_cards) 
+    }
+}
+
+fn main() {
+    // 1. Initialize a mutable deck (Owner of the Heap memory block).
+    let mut deck = Deck::new();
+
+    // 2. Randomize the pointers within the existing memory block.
+    deck.shuffle();
     
-    // Print the deck to the terminal using the pretty-print debug formatter {:#?}
-    println!("Here is the deck: {:#?}", deck); 
+    // 3. Move a slice of the memory block into 'hand'.
+    // Deck 'shrinks' and Hand 'grows' with the transferred card pointers.
+    let hand = deck.deal(3);
+    
+    // 4. Output results using the Debug formatter.
+    println!("--- Your Hand (Moved Memory) ---");
+    println!("{:#?}", hand);
+
+    println!("\n--- Remaining Deck ({} cards left in block) ---", deck.cards.len());
+    println!("{:#?}", deck); 
 }
