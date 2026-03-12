@@ -2,6 +2,11 @@
 name = "deck"
 version = "0.1.0"
 edition = "2024"
+default-run = "deck"
 
 [dependencies]
 rand = "0.8.5"
+
+[[bin]]
+name = "speed_test"
+path = "src/bin/speed_test.rs"
