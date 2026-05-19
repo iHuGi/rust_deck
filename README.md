@@ -2,7 +2,7 @@
 
 A high-performance Rust implementation of a playing card deck, focused on mastering memory ownership, borrowing, and heap allocation.
 
-## 🚧 Status: Work in Progress
+## 🚧 Status: Done
 Currently following the **Stephen Grider Rust Course**. This project serves as a "Proof of Work" for low-level systems programming concepts.
 
 ## 🧠 Engineering Highlights
